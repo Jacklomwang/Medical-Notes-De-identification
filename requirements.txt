@@ -1,4 +1,6 @@
 spacy>=3.7
+stanza>=1.8
+streamlit>=1.32
 tqdm>=4.66
 pandas>=2.0
 python-docx>=1.1
