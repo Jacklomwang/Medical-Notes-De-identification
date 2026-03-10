@@ -80,6 +80,7 @@ DEPT_HEADER_RE = re.compile(
 # 1) remove anything before first "Dear" occurrence
 # 2) remove anything from closing line onward.
 GREETING_RE = re.compile(r"(?i)\bdear\b")
+LAB_RESULTS_RE = re.compile(r"(?im)^\s*\*{1,2}\s*laboratory results\b")
 CLOSING_RE = re.compile(
     r"(?im)^\s*(best regards|kind regards|regards|sincerely|yours sincerely|"
     r"yours truly|warm regards|respectfully|thank you|Sincerely yours)[\s,!.]*$"
@@ -96,7 +97,7 @@ def _digit_ratio(s: str) -> float:
 def trim_letter_boundaries(text: str) -> str:
     """
     Remove content outside letter body boundaries:
-    - drop everything before the first "Dear"
+    - drop everything before the first "Dear" or "LABORATORY RESULTS"
     - drop everything from a closing line onward
     """
     if not text:
@@ -104,9 +105,17 @@ def trim_letter_boundaries(text: str) -> str:
 
     trimmed = text
 
+    start_positions = []
     greeting = GREETING_RE.search(trimmed)
     if greeting:
-        trimmed = trimmed[greeting.start() :]
+        start_positions.append(greeting.start())
+
+    lab_results = LAB_RESULTS_RE.search(trimmed)
+    if lab_results:
+        start_positions.append(lab_results.start())
+
+    if start_positions:
+        trimmed = trimmed[min(start_positions) :]
 
     closing = CLOSING_RE.search(trimmed)
     if closing:
